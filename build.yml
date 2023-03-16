@@ -1,0 +1,65 @@
+parameters:
+  - name: sourceRepo
+    type: string
+
+jobs:
+  - job: CalculateVersion
+    displayName: Calculate Version
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+     - checkout: self
+       fetchDepth: 0
+     - task: gitversion/setup@0
+       displayName: Install GitVersion
+       inputs:
+        versionSpec: "5.x"
+     - task: gitversion/execute@0
+       name: calculateVersion
+       displayName: Calculating version
+       inputs:
+        useConfigFile: True
+        configFilePath: "GitVersion.yml"
+  - job: Build
+    displayName: Build
+    dependsOn: CalculateVersion
+    pool:
+      vmImage: ubuntu-latest
+    variables:
+      version: $[dependencies.CalculateVersion.outputs['calculateVersion.GitVersion.SemVer']]
+      GRAALVM_VERSION: '22.3.1'
+      source-repo: ${{ parameters.sourceRepo }}
+      isNative: $(native-image)
+      java-home-options: JDKVersion
+    steps:
+      - bash: |
+          cd /tmp
+          curl -o GraalVM.tar.gz -L https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-$(GRAALVM_VERSION)/graalvm-ce-java17-linux-amd64-$(GRAALVM_VERSION).tar.gz
+          tar -xzf GraalVM.tar.gz
+          export PATH=/tmp/graalvm-ce-java17-$(GRAALVM_VERSION)/bin:$PATH
+          export JAVA_HOME=/tmp/graalvm-ce-java17-$(GRAALVM_VERSION)
+          echo "##vso[task.setvariable variable=java-home-options]Path"
+        displayName: "Install the latest GraalVM CE 22.x for Java 17 - JDK and Native Image"
+        condition: and(succeeded(), eq(variables.isNative, 'true'))
+      - task: Gradle@3
+        env:
+          ORG_GRADLE_PROJECT_HELM_USER: $(HELM_USER)
+          ORG_GRADLE_PROJECT_HELM_PASSWORD: $(HELM_PASSWORD)
+          ORG_GRADLE_PROJECT_DOCKER_HUB_USER: $(DOCKER_HUB_USER)
+          ORG_GRADLE_PROJECT_DOCKER_HUB_PASSWORD: $(DOCKER_HUB_PASSWORD)
+          ORG_GRADLE_PROJECT_DOCKER_UPLOAD_USER: $(DOCKER_UPLOAD_USER)
+          ORG_GRADLE_PROJECT_DOCKER_UPLOAD_PASSWORD: $(DOCKER_UPLOAD_PASSWORD)
+        inputs:
+          workingDirectory: ''
+          gradleWrapperFile: 'gradlew'
+          gradleOptions: '-Xmx3072m'
+          javaHomeOption: $(java-home-options)
+          jdkUserInputPath: "/tmp/graalvm-ce-java17-$(GRAALVM_VERSION)"
+          jdkVersionOption: '1.17'
+          jdkArchitectureOption: 'x64'
+          publishJUnitResults: true
+          testResultsFiles: '**/TEST-*.xml'
+          tasks: 'build -Pversion=$(version) --no-daemon'
+      - pwsh: |
+          helm registry login fsmakka.azurecr.io --username $(HELM_USER) --password $(HELM_PASSWORD)
+          helm push /home/vsts/work/1/s/build/helm/charts/$(source-repo)-$(version).tgz oci://fsmakka.azurecr.io/helm

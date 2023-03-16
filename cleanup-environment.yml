@@ -1,0 +1,23 @@
+parameters:
+  - name: branchName
+    type: string
+
+
+jobs:
+  - job: CleanupServices
+    steps:
+      #Cleanup Service Environment - fsm-akka-4eyes-argocd
+      - template: dispatch.yml@fsm-akka-azure-pipelines
+        parameters:
+          definitionId: "28"
+          sourceBranch: "master"
+          inputs: '"branchName": "${{ parameters.branchName }}"'
+  - job: CleanupDevEnvironment
+    dependsOn: CleanupServices
+    steps:
+      #Delete Branch Dev Environment <-> fsm-akka-dev-environment
+      - template: dispatch.yml@fsm-akka-azure-pipelines
+        parameters:
+          definitionId: "31"
+          sourceBranch: "master"
+          inputs: '"branchName": "${{ parameters.branchName }}"'
