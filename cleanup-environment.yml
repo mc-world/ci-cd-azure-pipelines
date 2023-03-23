@@ -6,8 +6,8 @@ parameters:
 jobs:
   - job: CleanupServices
     steps:
-      #Cleanup Service Environment - fsm-akka-4eyes-argocd
-      - template: dispatch.yml@fsm-akka-azure-pipelines
+      #Cleanup Service Environment - argocd
+      - template: dispatch.yml@ci-cd-azure-pipelines
         parameters:
           definitionId: "28"
           sourceBranch: "master"
@@ -15,8 +15,8 @@ jobs:
   - job: CleanupDevEnvironment
     dependsOn: CleanupServices
     steps:
-      #Delete Branch Dev Environment <-> fsm-akka-dev-environment
-      - template: dispatch.yml@fsm-akka-azure-pipelines
+      #Delete Branch Dev Environment <-> dev-environment
+      - template: dispatch.yml@ci-cd-azure-pipelines
         parameters:
           definitionId: "31"
           sourceBranch: "master"

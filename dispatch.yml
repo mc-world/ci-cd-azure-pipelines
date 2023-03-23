@@ -18,7 +18,7 @@ steps:
     inputs:
       targetType: inline
       script: |
-        $url = 'https://dev.azure.com/salgarswtor/fsm-akka-4eyes/_apis/build/builds?api-version=5.0'
+        $url = 'https://dev.azure.com/mcworld/library/_apis/build/builds?api-version=5.0'
         Write-Host  "URL: $url"
         $headers = New-Object "System.Collections.Generic.Dictionary[[String], [String]]"
         $headers.Add("Content-Type", "application/json")
@@ -37,12 +37,12 @@ steps:
         $response = Invoke-RestMethod $url -Method 'POST' -Headers $headers -Body $body
         Write-Host "Pipeline = ($response | ConvertTo-Json -Depth 100)"
         $buildId = $response.id
-        $buildInfo = (Invoke-RestMethod "https://dev.azure.com/salgarswtor/fsm-akka-4eyes/_apis/build/builds/${buildID}?api-version=5.0" -Method Get -Headers $headers)
+        $buildInfo = (Invoke-RestMethod "https://dev.azure.com/mcworld/library/_apis/build/builds/${buildID}?api-version=5.0" -Method Get -Headers $headers)
         while($response.status -eq "inProgress" -or $response.status -eq "notStarted") # keep checking till build completed
         {
             Write-Output "Build is $($response.status)... Sleep for 5 seconds.."
             Start-Sleep -Seconds 5 # Start sleep for 5 seconds
-            #$buildInfo = (Invoke-RestMethod "https://dev.azure.com/salgarswtor/fsm-akka-4eyes/_apis/build/builds/${buildID}?api-version=5.0" -Method Get -Headers $headers)
+            #$buildInfo = (Invoke-RestMethod "https://dev.azure.com/mcworld/library/_apis/build/builds/${buildID}?api-version=5.0" -Method Get -Headers $headers)
             #Write-Host "BuildInfo = ($buildInfo | ConvertTo-Json -Depth 100)"
             Write-Host "We are not waiting for result because Free Azure Account has only one thread to execute"
             break

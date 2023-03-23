@@ -35,8 +35,6 @@ jobs:
        env:
          ORG_GRADLE_PROJECT_HELM_USER: $(HELM_USER)
          ORG_GRADLE_PROJECT_HELM_PASSWORD: $(HELM_PASSWORD)
-         ORG_GRADLE_PROJECT_DOCKER_HUB_USER: $(DOCKER_HUB_USER)
-         ORG_GRADLE_PROJECT_DOCKER_HUB_PASSWORD: $(DOCKER_HUB_PASSWORD)
          ORG_GRADLE_PROJECT_DOCKER_UPLOAD_USER: $(DOCKER_UPLOAD_USER)
          ORG_GRADLE_PROJECT_DOCKER_UPLOAD_PASSWORD: $(DOCKER_UPLOAD_PASSWORD)
        inputs:
@@ -49,8 +47,8 @@ jobs:
         publishJUnitResults: false
         tasks: 'helmPackage -Pversion=$(version) --no-daemon'
      - pwsh: |
-         helm registry login fsmakka.azurecr.io --username $(HELM_USER) --password $(HELM_PASSWORD)
-         helm push /home/vsts/work/1/s/build/helm/charts/$env:CHART_NAME-$(version).tgz oci://fsmakka.azurecr.io/helm
+         helm registry login libraryacr.azurecr.io --username $(HELM_USER) --password $(HELM_PASSWORD)
+         helm push /home/vsts/work/1/s/build/helm/charts/$env:CHART_NAME-$(version).tgz oci://libraryacr.azurecr.io/helm
        displayName: Helm Push
        env:
         CHART_NAME: ${{ parameters.chartName }}
