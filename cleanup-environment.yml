@@ -9,7 +9,7 @@ jobs:
       #Cleanup Service Environment - argocd
       - template: dispatch.yml@ci-cd-azure-pipelines
         parameters:
-          definitionId: "28"
+          definitionId: "39"
           sourceBranch: "master"
           inputs: '"branchName": "${{ parameters.branchName }}"'
   - job: CleanupDevEnvironment
@@ -18,6 +18,6 @@ jobs:
       #Delete Branch Dev Environment <-> dev-environment
       - template: dispatch.yml@ci-cd-azure-pipelines
         parameters:
-          definitionId: "31"
+          definitionId: "40"
           sourceBranch: "master"
           inputs: '"branchName": "${{ parameters.branchName }}"'
