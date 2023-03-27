@@ -56,24 +56,24 @@ jobs:
       #Create Branch with Reuse <-> helm-umbrella-chart
       - template: dispatch.yml@ci-cd-azure-pipelines
         parameters:
-          definitionId: "19"
+          definitionId: "22"
           sourceBranch: "$(umbrella-chart-base-branch-name)"
           inputs: '"branchName": "$(build-type)/$(branch-name)-$(repo-name)"'
       #Publish and Prepare Environment <-> helm-umbrella-chartz
       - template: dispatch.yml@ci-cd-azure-pipelines
         parameters:
-          definitionId: "14"
+          definitionId: "35"
           sourceBranch: "$(umbrella-chart-base-branch-name)"
           inputs: '"branchName": "$(build-type)/$(branch-name)", "repoName": "$(repo-name)", "serviceVersion": "$(version)", "umbrellaChartBaseName": "$(umbrella-chart-base-branch-name)"'
       #Build Infrastructure for Environment <-> helm-infrastructure-chart
       - template: dispatch.yml@ci-cd-azure-pipelines
         parameters:
-          definitionId: "17"
+          definitionId: "37"
           sourceBranch: "$(infrastructure-base-branch-name)"
           inputs: '"branchName": "$(build-type)/$(branch-name)-$(repo-name)", "valueFile": "$(value-file)"'
-      #Build Service Environment - rgocd
+      #Build Service Environment - argocd
       - template: dispatch.yml@ci-cd-azure-pipelines
         parameters:
-          definitionId: "21"
+          definitionId: "38"
           sourceBranch: "master"
           inputs: '"branchName": "$(build-type)/$(branch-name)-$(repo-name)"'
